@@ -127,19 +127,15 @@ export class Log {
 }
 
 export class NoOpLog extends Log {
+  constructor() {
+    super(LogLevel.NONE);
+  }
+
   log(): void {}
 
   error(message: Error): void {
     throw message;
   }
-}
-
-export interface ResponseInfo {
-  status: number;
-  statusText: string;
-  method: string;
-  url: string;
-  time: number;
 }
 
 const ResponseInfoSchema = z.object({

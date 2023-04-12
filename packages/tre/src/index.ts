@@ -540,10 +540,6 @@ export class Miniflare {
           request
         );
       } else if (url.pathname === "/core/log") {
-        if (this.#log.level < LogLevel.INFO) {
-          return;
-        }
-
         const response = await formatResponse(request);
         this.#log.log(response);
       } else {
@@ -700,6 +696,7 @@ export class Miniflare {
       allWorkerRoutes,
       fallbackWorkerName: this.#workerOpts[0].core.name,
       loopbackPort,
+      log: this.#log,
     });
     for (const service of globalServices) {
       // Global services should all have unique names
