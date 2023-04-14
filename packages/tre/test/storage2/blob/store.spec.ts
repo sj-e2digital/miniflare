@@ -113,7 +113,7 @@ test("FileBlobStore: put: file-system specific functionality", async (t) => {
 
   // Check created file is read-only
   const id = await store.put(new Blob(["😈"]).stream());
-  const filePath = path.join(root, id.substring(0, 2), id.substring(2));
+  const filePath = path.join(root, id);
   await t.throwsAsync(fs.writeFile(filePath, "new"), { code: "EACCES" });
 });
 

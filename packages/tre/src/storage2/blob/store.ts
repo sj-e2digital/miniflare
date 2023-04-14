@@ -50,7 +50,7 @@ export interface BlobStore {
   delete(id: BlobId): Promise<void>;
 }
 
-function generateBlobId(): string {
+function generateBlobId(): BlobId {
   const idBuffer = Buffer.alloc(32 + 8);
   crypto.randomFillSync(idBuffer, 0, 32);
   idBuffer.writeBigUint64BE(process.hrtime.bigint(), 32);
@@ -61,16 +61,16 @@ export class MemoryBlobStore implements BlobStore {
   readonly #blobs = new Map<string, Uint8Array>();
 
   get(
-    id: string,
+    id: BlobId,
     range?: InclusiveRange
   ): Promise<ReadableStream<Uint8Array> | null>;
   get(
-    id: string,
+    id: BlobId,
     ranges: InclusiveRange[],
     opts: MultipartOptions
   ): Promise<MultipartReadableStream | null>;
   async get(
-    id: string,
+    id: BlobId,
     ranges?: InclusiveRange | InclusiveRange[],
     opts?: MultipartOptions
   ): Promise<ReadableStream<Uint8Array> | MultipartReadableStream | null> {
@@ -84,7 +84,7 @@ export class MemoryBlobStore implements BlobStore {
     }
   }
 
-  async put(stream: ReadableStream<Uint8Array>): Promise<string> {
+  async put(stream: ReadableStream<Uint8Array>): Promise<BlobId> {
     const id = generateBlobId();
     const buffer = await arrayBuffer(stream);
     const blob = new Uint8Array(buffer);
@@ -96,7 +96,7 @@ export class MemoryBlobStore implements BlobStore {
     return id;
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: BlobId): Promise<void> {
     this.#blobs.delete(id);
   }
 }
@@ -108,22 +108,22 @@ export class FileBlobStore implements BlobStore {
     this.#root = path.resolve(root);
   }
 
-  #idFilePath(id: string) {
-    const filePath = path.join(this.#root, id.substring(0, 2), id.substring(2));
+  #idFilePath(id: BlobId) {
+    const filePath = path.join(this.#root, id);
     return filePath.startsWith(this.#root) ? filePath : null;
   }
 
   get(
-    id: string,
+    id: BlobId,
     range?: InclusiveRange
   ): Promise<ReadableStream<Uint8Array> | null>;
   get(
-    id: string,
+    id: BlobId,
     ranges: InclusiveRange[],
     opts: MultipartOptions
   ): Promise<MultipartReadableStream | null>;
   async get(
-    id: string,
+    id: BlobId,
     ranges?: InclusiveRange | InclusiveRange[],
     opts?: MultipartOptions
   ): Promise<ReadableStream<Uint8Array> | MultipartReadableStream | null> {
@@ -145,7 +145,7 @@ export class FileBlobStore implements BlobStore {
     }
   }
 
-  async put(stream: ReadableStream<Uint8Array>): Promise<string> {
+  async put(stream: ReadableStream<Uint8Array>): Promise<BlobId> {
     const id = generateBlobId();
 
     // Get path for this ID, this should never be null as blob IDs are encoded
@@ -162,7 +162,7 @@ export class FileBlobStore implements BlobStore {
     return id;
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: BlobId): Promise<void> {
     // Get path for this ID and delete, ignoring if outside root or not found
     const filePath = this.#idFilePath(id);
     try {
