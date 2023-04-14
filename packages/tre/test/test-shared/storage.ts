@@ -1,10 +1,10 @@
 import crypto from "crypto";
 import fs from "fs/promises";
 import path from "path";
+import { ReadableStream } from "stream/web";
 import { TextDecoder, TextEncoder } from "util";
 import { Clock, sanitisePath, unwrapBYOBRequest } from "@miniflare/tre";
 import { ExecutionContext } from "ava";
-import { ReadableStream } from "stream/web";
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
